@@ -1,0 +1,95 @@
+#!/usr/bin/env ruby
+require 'thor'
+require 'pry'
+require 'yaml'
+require 'thor/completion'
+
+module CLI
+
+  class Subcommand1 < Thor
+    class_option :commandsub1_classoption1, :type => :boolean, :hide => false
+
+    desc "commandsub1_command1", "Subcommand command1"
+    method_option "commandsub1_command1_option1", :type => :string, :banner => "FILE", :hide => false
+    def commandsub1_command1
+      if options[:toto]
+        puts "Toto!"
+      end
+      if options[:commandsub1_classoption1]
+        puts "Titi!"
+      end
+      puts "Yo"
+    end
+
+  end
+
+  class Subcommand2 < Thor
+
+    desc "commandsub2_command1", "Subcommand command2"
+    method_option "commandsub1_command1_option1", :type => :string, :banner => "FILE", :hide => true
+    def commandsub2_command1(str)
+    end
+
+  end
+
+  class Main < Thor
+    include Thor::Completion::Command
+
+    class_option :classoption1, :type => :boolean, :hide => false, :aliases => "-c"
+
+    desc "command1", "My first command", :hide => true
+    map %w(-c) => :command1
+    def command1
+      pp methods.select{|m| m == :command2}
+    end
+
+    desc "command2", "My second command", :hide => true
+    method_option :option1, :type => :string, :aliases => ["-o", "--opt"], :banner => "STRING", :hide => true
+    method_option :option2, :type => :boolean, :aliases => "--opt2"
+    method_option :option3, :type => :string, :banner => "FILE"
+    method_option :hidden_option, :type => :string, :hide => true
+    map %w(cmd2) => :command2
+    def command2(*array)
+      if options[:option1].nil?
+        puts "nothing"
+      else
+        puts options[:option1]
+      end
+    end
+
+    desc "command3", "My second command", :hide => true
+    def command3(a, b)
+      puts "---> a=#{a}, b=#{b}"
+    end
+
+    desc "hidden_command3", "My hidden command", :hide => true
+    def hidden_command(a, b)
+      puts "bye"
+    end
+
+    desc 'commandsub1 <SUBCOMMAND>', "First subcommand", :hide => true
+    method_option :commandsub1_option1, :type => :boolean
+    subcommand 'commandsub1', CLI::Subcommand1
+
+    desc 'commandsub2 <SUBCOMMAND>', "Second subcommand", :hide => false
+    subcommand 'commandsub2', CLI::Subcommand2
+
+  end
+
+  def self.start(*args)
+    # `cli command -h` does not work without the following, except for subcommands...
+    # Ref: https://stackoverflow.com/a/49044225/6431461
+    if (Thor::HELP_MAPPINGS & ARGV).any? and subcommands.grep(/^#{ARGV[0]}/).empty?
+      puts "Apply workaround to handle the help command in #{ARGV}"
+      Thor::HELP_MAPPINGS.each do |cmd|
+        if match = ARGV.delete(cmd)
+          ARGV.unshift match
+        end
+      end
+    end
+    super
+  end
+
+end
+
+CLI::Main.start(ARGV)
