@@ -60,11 +60,12 @@ class Thor
             parameters = command_class.new.method(k).parameters
           end
           options = command.options.merge(options).select{|kk,vv| not vv.hide}
-          comp[k] = complete_commands(new_commands, parameters, options).
+          r = str2regex(k)
+          comp[r] = complete_commands(new_commands, parameters, options).
             merge(complete_parameters(new_commands, parameters, options)).
             merge(complete_options(new_commands, parameters, options))
           command_class.map.select{|kk,vv| vv.to_s == k}.each do |kk,vv|
-            comp[kk.to_s]=comp[k]
+            comp[str2regex(kk.to_s)]=comp[r]
           end
         end
         return comp
@@ -74,15 +75,18 @@ class Thor
         comp = {}
         if parameters.any?
           p = parameters.first
-          k = case p[0]
+          r = case p[0]
           when :opt
-            "[<#{p[1]}>]"
+            #"[<#{p[1]}>]"
+            %r{^[^\s]*$}
           when :rest
-            "[<#{p[1]}>[...]]"
+            #"[<#{p[1]}>[...]]"
+            %r{^[^\s]+(\s+[^\s]+)*$}
           else
-            "<#{p[1]}>"
+            #"<#{p[1]}>"
+            %r{^[^\s]+$}
           end
-          comp[k.upcase] = complete_commands(commands, parameters[1..-1], options).
+          comp[r] = complete_commands(commands, parameters[1..-1], options).
             merge(complete_parameters(commands, parameters[1..-1], options)).
             merge(complete_options(commands, parameters[1..-1], options))
         end
@@ -96,14 +100,34 @@ class Thor
             merge(complete_parameters(commands, parameters, options.select{|kk,vv| kk != k})).
             merge(complete_options(commands, parameters, options.select{|kk,vv| kk != k}))
           ([ "--#{v.name}" ] + v.aliases).each do |o|
-            comp[o] = if v.type == :boolean
-               h
+            if v.type == :boolean
+              comp[str2regex(o)] = h
             else
-               { "#{v.banner}" => h }
+              comp[str2regex(o)] = { %r{^[^\s]+$} => h }
+              comp[str2regex(o, "=[^\s]+")] = h
             end
           end
         end
         return comp
+      end
+
+      def escape_char(char)
+        to_escape = [ '?', '*', '+', '(', ')', '{', '}', '[', ']', '^', ':', '!', '|', '\\', '-', '\$', '#' ]
+        if to_escape.include?(char)
+          return "\\#{char}"
+        else
+          return char
+        end
+      end
+
+      def str2regex(str, suffix="", regex="")
+        puts "str2regex(#{str}, #{suffix}, #{regex})"
+        char = escape_char(str[-1])
+        if str.size == 1
+          return %r{^#{char}#{regex}#{suffix}$}
+        else
+          str2regex(str[0..-2], suffix, "(?:#{char}#{regex})?")
+        end
       end
 
     end
