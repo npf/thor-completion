@@ -1,3 +1,4 @@
+require "thor"
 require "thor/completion/version"
 
 module Thor
@@ -6,3 +7,6 @@ module Thor
     # Your code goes here...
   end
 end
+
+require "thor/completion/command"
+require "thor/completion/generator"
