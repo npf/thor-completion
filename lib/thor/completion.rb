@@ -1,7 +1,7 @@
 require "thor"
 require "thor/completion/version"
 
-module Thor
+class Thor
   module Completion
     class Error < StandardError; end
     # Your code goes here...
