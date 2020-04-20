@@ -32,7 +32,7 @@ class Thor
           completion_list.push("'#{str}'")
         else
           completion_hash.each do |k,v|
-            to_s_rec(v, "#{str} #{k}", completion_list)
+            to_s_rec(v[:children], "#{str} #{k}", completion_list)
           end
         end
       end
@@ -46,11 +46,11 @@ class Thor
       end
 
       def filter(completions, words)
-        filtered = completions.select { |r| words.first.match(r) }.values
+        filtered = completions.select { |k,v| words.first.match(v[:regex]) }
         if words.size == 1
-          return filtered.map{ |v| v[:str] }
+          return filtered.keys
         else
-          return filtered.map{ |v| filter(v[:children], words[1..-1]) }
+          return filtered.values.map{ |v| filter(v[:children], words[1..-1]) }
         end
       end
 
@@ -73,17 +73,17 @@ class Thor
             subcommand_class = command_class.subcommand_classes.find{|kk,vv| kk == k}[1]
             new_commands = subcommand_class.all_commands.select{|kk,vv| not vv.hidden?}.transform_values{|vv| [vv, subcommand_class]}
             parameters = []
+            options = command.options.select{|kk,vv| not vv.hide}
           else
             parameters = command_class.new.method(k).parameters
+            options = command.options.merge(options).select{|kk,vv| not vv.hide}
           end
-          options = command.options.merge(options).select{|kk,vv| not vv.hide}
-          r = str2regex(k)
           children = complete_commands(new_commands, parameters, options).
             merge(complete_parameters(new_commands, parameters, options)).
             merge(complete_options(new_commands, parameters, options))
-          comp[r] = { :str => k, :children => children }
+          comp[k] = { :regex => str2regex(k), :children => children }
           command_class.map.select{|kk,vv| vv.to_s == k}.each do |kk,vv|
-            comp[str2regex(kk.to_s)] = { :str => kk.to_s, :children => children }
+            comp[kk.to_s] = { :regex => str2regex(kk.to_s), :children => children }
           end
         end
         return comp
@@ -104,7 +104,7 @@ class Thor
             #"<#{p[1]}>"
             %r{^[^\s]+$}
           end
-          comp[r] = { :str => "ARGS", :children => complete_commands(commands, parameters[1..-1], options).
+          comp["ARGS"] = { :regex => r, :children => complete_commands(commands, parameters[1..-1], options).
             merge(complete_parameters(commands, parameters[1..-1], options)).
             merge(complete_options(commands, parameters[1..-1], options))
           }
@@ -120,10 +120,10 @@ class Thor
             merge(complete_options(commands, parameters, options.select{|kk,vv| kk != k}))
           ([ "--#{v.name}" ] + v.aliases).each do |o|
             if v.type == :boolean
-              comp[str2regex(o)] = { :str => o, :children => h }
+              comp[o] = { :regex => str2regex(o), :children => h }
             else
-              comp[str2regex(o)] = { :str => o, :children => { %r{^[^\s]+$} => { :str => "ARGS", :children => h } } }
-              comp[str2regex(o + '=', "[^\s]*")] = { :str => "#{o}=ARGS", :children => h }
+              comp[o] = { :regex => str2regex(o), :children => { %r{^[^\s]+$} => { :str => "ARGS", :children => h } } }
+              comp["#{o}=ARGS"] = { :regex => str2regex(o + '=', "[^\s]*"), :children => h }
             end
           end
         end
