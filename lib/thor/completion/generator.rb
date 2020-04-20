@@ -37,6 +37,23 @@ class Thor
         end
       end
 
+      def match(line, point, key, type)
+        words = line.split(%r{\s+})[1..-1]
+        if line.match?(%r{\s$})
+          words.push("")
+        end
+        return filter(complete, words).flatten.uniq
+      end
+
+      def filter(completions, words)
+        filtered = completions.select { |r| words.first.match(r) }.values
+        if words.size == 1
+          return filtered.map{ |v| v[:str] }
+        else
+          return filtered.map{ |v| filter(v[:children], words[1..-1]) }
+        end
+      end
+
       def complete()
         commands = @thor.all_commands.select{|k,v| not v.hidden?}.transform_values{|v| [v, @thor]}
         parameters = []
@@ -61,11 +78,12 @@ class Thor
           end
           options = command.options.merge(options).select{|kk,vv| not vv.hide}
           r = str2regex(k)
-          comp[r] = complete_commands(new_commands, parameters, options).
+          children = complete_commands(new_commands, parameters, options).
             merge(complete_parameters(new_commands, parameters, options)).
             merge(complete_options(new_commands, parameters, options))
+          comp[r] = { :str => k, :children => children }
           command_class.map.select{|kk,vv| vv.to_s == k}.each do |kk,vv|
-            comp[str2regex(kk.to_s)]=comp[r]
+            comp[str2regex(kk.to_s)] = { :str => kk.to_s, :children => children }
           end
         end
         return comp
@@ -86,9 +104,10 @@ class Thor
             #"<#{p[1]}>"
             %r{^[^\s]+$}
           end
-          comp[r] = complete_commands(commands, parameters[1..-1], options).
+          comp[r] = { :str => "ARGS", :children => complete_commands(commands, parameters[1..-1], options).
             merge(complete_parameters(commands, parameters[1..-1], options)).
             merge(complete_options(commands, parameters[1..-1], options))
+          }
         end
         return comp
       end
@@ -101,10 +120,10 @@ class Thor
             merge(complete_options(commands, parameters, options.select{|kk,vv| kk != k}))
           ([ "--#{v.name}" ] + v.aliases).each do |o|
             if v.type == :boolean
-              comp[str2regex(o)] = h
+              comp[str2regex(o)] = { :str => o, :children => h }
             else
-              comp[str2regex(o)] = { %r{^[^\s]+$} => h }
-              comp[str2regex(o, "=[^\s]+")] = h
+              comp[str2regex(o)] = { :str => o, :children => { %r{^[^\s]+$} => { :str => "ARGS", :children => h } } }
+              comp[str2regex(o + '=', "[^\s]*")] = { :str => "#{o}=ARGS", :children => h }
             end
           end
         end
@@ -120,13 +139,12 @@ class Thor
         end
       end
 
-      def str2regex(str, suffix="", regex="")
-        puts "str2regex(#{str}, #{suffix}, #{regex})"
-        char = escape_char(str[-1])
-        if str.size == 1
-          return %r{^#{char}#{regex}#{suffix}$}
+      def str2regex(str, regex="")
+        if str.empty?
+          return %r{^#{regex}$}
         else
-          str2regex(str[0..-2], suffix, "(?:#{char}#{regex})?")
+          char = escape_char(str[-1])
+          str2regex(str[0..-2], "(?:#{char}#{regex})?")
         end
       end
 

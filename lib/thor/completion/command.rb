@@ -9,7 +9,11 @@ class Thor
           desc "completion", "Print completion"
           def completion
             name = options.name || File.basename($0)
-            puts Completion::Generator.new(self.class, name).to_yaml
+            comp_line = ENV["COMP_LINE"]
+            comp_point = ENV["COMP_POINT"]
+            comp_key = ENV["COMP_KEY"]
+            comp_type = ENV["COMP_TYPE"]
+            puts Completion::Generator.new(self.class, name).match(comp_line, comp_point, comp_key, comp_type)
           end
         end
       end
