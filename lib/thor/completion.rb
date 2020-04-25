@@ -1,5 +1,5 @@
-require "thor"
-require "thor/completion/version"
+require 'thor'
+require 'thor/completion/version'
 
 class Thor
   module Completion
@@ -8,5 +8,5 @@ class Thor
   end
 end
 
-require "thor/completion/command"
-require "thor/completion/generator"
+require 'thor/completion/command'
+require 'thor/completion/generator'
