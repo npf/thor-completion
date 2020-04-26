@@ -1,8 +1,6 @@
 # Thor::Completion
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/thor/completion`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+`Thor::Completion` provides an automatic completion for `Thor` based tools. Commands, arguments and options are automatically computed using Ruby's introspection.
 
 ## Installation
 
@@ -22,7 +20,16 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Using this gem just consist in including `Thor::Completion::Command` to your main class, which already inherits from the `Thor` class, such as:
+```
+class MyTool < Thor
+    include Thor::Completion::Command
+```
+
+Once this is done, the tool completion can be configured in Bash shells using the `completion` command of the tool itself, for instance with the following command:
+```
+bash$ eval $(mytool completion --bash-setup)
+```
 
 ## Development
 
