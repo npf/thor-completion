@@ -14,9 +14,26 @@ Metrics/AbcSize:
 Metrics/MethodLength:
   Max: 25
 
-
 # Offense count: 23
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https
 Metrics/LineLength:
   Max: 120
+
+# Offense count: 3
+# Configuration parameters: CountComments, ExcludedMethods.
+Metrics/BlockLength:
+  Max: 200
+
+# Offense count: 3
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: auto_detection, squiggly, active_support, powerpack, unindent
+Layout/IndentHeredoc:
+  Exclude:
+    - 'spec/thor/completion_spec.rb'
+
+# Offense count: 3
+Security/Eval:
+  Exclude:
+    - 'spec/spec_helper.rb'
