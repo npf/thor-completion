@@ -6,11 +6,11 @@ class Thor
         klass.class_eval do
           desc 'completion', 'Print completion', hide: true
           long_desc <<-LONGDESC
-          `#{$0} completion` will handle the shell completion for the #{$0} command
+          `#{$PROGRAM_NAME} completion` will handle the shell completion for the #{$PROGRAM_NAME} command
 
           In a bash shell, the completion setup can achieved by running the following command:
 
-          `eval $(#{$0} completion --bash-setup)`
+          `eval $(#{$PROGRAM_NAME} completion --bash-setup)`
 
           Other options are for debugging only.
           LONGDESC
@@ -19,9 +19,10 @@ class Thor
           method_option :name, desc: 'Set the tool name', type: :string
           method_option :line, desc: 'Give the command line to complete (replace $COMP_LINE)',
                                type: :string
-          def completion(*_args) # when called by `complete -C <command>`, 3 useless arguments a passed
+          # when called by `complete -C <command>`, 3 useless arguments a passed
+          def completion(*_args)
             if options.bash_setup
-              puts "complete -C '#{$0} completion' #{$0}"
+              puts "complete -C '#{$PROGRAM_NAME} completion' #{$PROGRAM_NAME}"
               return
             end
             name = options.name || File.basename($PROGRAM_NAME)

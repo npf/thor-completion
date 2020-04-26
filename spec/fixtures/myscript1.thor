@@ -23,4 +23,4 @@ class MyScript1 < Thor
   end
 end
 
-MyScript1.start() unless File.basename($0) == 'rspec'
+MyScript1.start unless File.basename($PROGRAM_NAME) == 'rspec'

@@ -7,9 +7,8 @@ end
 
 require 'thor/completion'
 
-
 # Load fixtures
-load File.join(File.dirname(__FILE__), "fixtures", "myscript1.thor")
+load File.join(File.dirname(__FILE__), 'fixtures', 'myscript1.thor')
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
