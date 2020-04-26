@@ -37,3 +37,8 @@ Layout/IndentHeredoc:
 Security/Eval:
   Exclude:
     - 'spec/spec_helper.rb'
+
+# Offense count: 3
+Style/EvalWithLocation:
+  Exclude:
+    - 'spec/spec_helper.rb'
