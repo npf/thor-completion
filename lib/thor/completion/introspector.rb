@@ -82,10 +82,10 @@ class Thor
                 /^[^\s]*$/
               when :rest
                 # "[<#{p[1]}>[...]]"
-                /^[^\s]+(\s+[^\s]+)*$/
+                /^[^\s]*(\s+[^\s]+)*$/
               else
                 # "<#{p[1]}>"
-                /^[^\s]+$/
+                /^[^\s]*$/
               end
           comp['ARGVAL'] = { regexp: r, children: get_commands_rec(commands, parameters[1..-1], options)
                            .merge(get_parameters_rec(commands, parameters[1..-1], options))
