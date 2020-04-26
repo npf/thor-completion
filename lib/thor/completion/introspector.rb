@@ -64,9 +64,9 @@ class Thor
           children = get_commands_rec(new_commands, parameters, options)
                      .merge(get_parameters_rec(new_commands, parameters, options))
                      .merge(get_options_rec(new_commands, parameters, options))
-          comp[k] = { regex: Completion::Regexp.build(k), children: children }
+          comp[k] = { regexp: Completion::Regexp.build(k), children: children }
           command_class.map.select { |_kk, vv| vv.to_s == k }.each_key do |kk|
-            comp[kk.to_s] = { regex: Completion::Regexp.build(kk.to_s), children: children }
+            comp[kk.to_s] = { regexp: Completion::Regexp.build(kk.to_s), children: children }
           end
         end
         comp
@@ -87,9 +87,9 @@ class Thor
                 # "<#{p[1]}>"
                 /^[^\s]+$/
               end
-          comp['ARGS'] = { regex: r, children: get_commands_rec(commands, parameters[1..-1], options)
-                         .merge(get_parameters_rec(commands, parameters[1..-1], options))
-                         .merge(get_options_rec(commands, parameters[1..-1], options)) }
+          comp['ARGVAL'] = { regexp: r, children: get_commands_rec(commands, parameters[1..-1], options)
+                           .merge(get_parameters_rec(commands, parameters[1..-1], options))
+                           .merge(get_options_rec(commands, parameters[1..-1], options)) }
         end
         comp
       end
@@ -100,12 +100,13 @@ class Thor
           h = get_commands_rec(commands, parameters, options.reject { |kk, _vv| kk == k })
               .merge(get_parameters_rec(commands, parameters, options.reject { |kk, _vv| kk == k }))
               .merge(get_options_rec(commands, parameters, options.reject { |kk, _vv| kk == k }))
-          (["--#{v.name.gsub('_','-')}"] + v.aliases).each do |o|
+          (["--#{v.name.tr('_', '-')}"] + v.aliases).each do |o|
             if v.type == :boolean
-              comp[o] = { regex: Completion::Regexp.build(o), children: h }
+              comp[o] = { regexp: Completion::Regexp.build(o), children: h }
             else
-              comp[o] = { regex: Completion::Regexp.build(o), children: { /^[^\s]+$/ => { str: 'ARGS', children: h } } }
-              comp["#{o}=ARGS"] = { regex: Completion::Regexp.build(o + '=', "[^\s]*"), children: h }
+              comp[o] = { regexp: Completion::Regexp.build(o), children: { 'OPTVAL' => { regexp: /^[^\s]+$/,
+                                                                                         children: h } } }
+              comp["#{o}=OPTVAL"] = { regexp: Completion::Regexp.build(o + '=', "[^\s]*"), children: h }
             end
           end
         end
