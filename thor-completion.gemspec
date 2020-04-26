@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = 'Handle bash completion for Thor based tools'
   spec.description   = 'Handle bash completion for Thor based tools'
-  spec.homepage      = 'https://github.com/npf/thor-bashcompletion'
+  spec.homepage      = 'https://github.com/npf/thor-completion'
   spec.license       = 'MIT'
   spec.required_ruby_version = Gem::Requirement.new('>= 2.3.0')
 
