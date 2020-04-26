@@ -33,13 +33,13 @@ module CLI
 
     class_option :classoption1, type: :boolean, hide: false, aliases: '-c'
 
-    desc 'command1', 'My first command', hide: true
+    desc 'command1', 'My first command', hide: false
     map %w[-c] => :command1
     def command1
       pp(methods.select { |m| m == :command2 })
     end
 
-    desc 'command2', 'My second command', hide: true
+    desc 'command2', 'My second command', hide: false
     method_option :option1, type: :string, aliases: ['-o', '--opt'], banner: 'STRING', hide: true
     method_option :option2, type: :boolean, aliases: '--opt2'
     method_option :option3, type: :string, banner: 'FILE'
