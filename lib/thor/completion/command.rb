@@ -11,7 +11,7 @@ class Thor
                                type: :string
           def completion
             name = options.name || File.basename($PROGRAM_NAME)
-            line = options.line || ENV['COMP_LINE']
+            line = (options.line.nil?)?ENV['COMP_LINE']:"#{name} #{options.line}"
             if options.dump
               puts Completion::Introspector.new(self.class, name)
             else

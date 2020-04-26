@@ -136,30 +136,32 @@ RSpec.describe Thor::Completion do
     end
 
     it 'dumps its completions' do
-      expect(capture(:stdout) { MyScript.start(%w[completion --dump --name=MyScript]) }).equal? <<-MYSCRIPTOUTPUT
-  'MyScript subcommand subcommand_command ARGVAL'
-  'MyScript command ARGVAL --option OPTVAL'
-  'MyScript command ARGVAL --option=OPTVAL'
-  'MyScript command --option OPTVAL ARGVAL'
-  'MyScript command --option=OPTVAL ARGVAL'
-  'MyScript --class-option subcommand subcommand_command ARGVAL'
-  'MyScript --class-option command ARGVAL --option OPTVAL'
-  'MyScript --class-option command ARGVAL --option=OPTVAL'
-  'MyScript --class-option command --option OPTVAL ARGVAL'
-  'MyScript --class-option command --option=OPTVAL ARGVAL'
+      expect(capture(:stdout) { MyScript.start(%w[completion --dump --name=MyScript]) }).to eq <<-MYSCRIPTOUTPUT
+'MyScript subcommand subcommand_command ARGVAL'
+'MyScript command ARGVAL --option OPTVAL'
+'MyScript command ARGVAL --option=OPTVAL'
+'MyScript command --option OPTVAL ARGVAL'
+'MyScript command --option=OPTVAL ARGVAL'
+'MyScript --class-option subcommand subcommand_command ARGVAL'
+'MyScript --class-option command ARGVAL --option OPTVAL'
+'MyScript --class-option command ARGVAL --option=OPTVAL'
+'MyScript --class-option command --option OPTVAL ARGVAL'
+'MyScript --class-option command --option=OPTVAL ARGVAL'
 MYSCRIPTOUTPUT
     end
 
     it 'gives a completion' do
-      ENV['COMP_LINE'] = 'MyScript co'
-      puts capture(:stdout) { MyScript.start(%w[completion --name=MyScript]) }
-      expect(capture(:stdout) { MyScript.start(%w[completion --name=MyScript]) }).to be 'command'
+      expect(capture(:stdout) { MyScript.start(%w[completion --name=MyScript --line co]) }).to eq <<-COMPLETION
+command
+COMPLETION
     end
 
-    ENV['COMP_LINE'] = 'MyScript command '
-    it 'gives a completion' do
-      puts capture(:stdout) { MyScript.start(%w[completion --name=MyScript]) }
-      expect(capture(:stdout) { MyScript.start(%w[completion --name=MyScript]) }).equal? 'command'
+    it 'gives another completion' do
+      expect(capture(:stdout) { MyScript.start(%w[completion --name=MyScript --line command\ ]) }).to eq <<-COMPLETION
+ARGVAL
+--option
+--option=OPTVAL
+COMPLETION
     end
   end
 end
