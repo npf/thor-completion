@@ -1,41 +1,40 @@
 class Thor
   module Completion
     # Introspection functions to retrieve the thor completions
-    module Introspector
-      def self.run(thor, name)
-        raise Thor::Completion::Error, 'Inspector already run' unless @completions.nil?
+    class Introspector
+      def initialize(thor, name)
         @thor = thor
         @name = name
         build_completions
         to_a
       end
 
-      def self.to_yaml
+      def to_yaml
         to_h.to_yaml
       end
 
-      def self.to_h
+      def to_h
         @completions
       end
 
-      def self.to_s
+      def to_s
         to_a.join("\n")
       end
 
-      def self.to_a
+      def to_a
         completion_list = []
         to_a_rec(@completions, @name, completion_list)
         completion_list
       end
 
-      def self.to_a_rec(completion_hash, str, completion_list)
+      def to_a_rec(completion_hash, str, completion_list)
         return completion_list.push("'#{str}'") if completion_hash.empty?
         completion_hash.each do |k, v|
           to_a_rec(v[:children], "#{str} #{k}", completion_list)
         end
       end
 
-      def self.build_completions
+      def build_completions
         commands = @thor.all_commands.reject { |_k, v| v.hidden? }.transform_values { |v| [v, @thor] }
         parameters = []
         options = @thor.class_options.reject { |_kk, vv| vv.hide }
@@ -45,7 +44,7 @@ class Thor
         @completions = completions
       end
 
-      def self.get_commands_rec(commands, parameters, options)
+      def get_commands_rec(commands, parameters, options)
         comp = {}
         commands.each do |k, v|
           command, command_class = v
@@ -72,7 +71,7 @@ class Thor
         comp
       end
 
-      def self.get_parameters_rec(commands, parameters, options)
+      def get_parameters_rec(commands, parameters, options)
         comp = {}
         if parameters.any?
           p = parameters.first
@@ -94,7 +93,7 @@ class Thor
         comp
       end
 
-      def self.get_options_rec(commands, parameters, options)
+      def get_options_rec(commands, parameters, options)
         comp = {}
         options.each do |k, v|
           h = get_commands_rec(commands, parameters, options.reject { |kk, _vv| kk == k })
@@ -111,7 +110,7 @@ class Thor
         end
         comp
       end
-      private_class_method :to_a_rec, :build_completions, :get_commands_rec, :get_parameters_rec, :get_options_rec
+      private :to_a_rec, :build_completions, :get_commands_rec, :get_parameters_rec, :get_options_rec
     end
   end
 end

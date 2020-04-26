@@ -9,15 +9,12 @@ class Thor
           method_option :name, desc: 'Command name', type: :string
           def completion
             name = options.name || File.basename($PROGRAM_NAME)
-            Completion::Introspector.run(self.class, name)
             if options.dump
-              puts Completion::Introspector
+              puts Completion::Introspector.new(self.class, name)
             else
+              generator = Completion::Generator.new(self.class, name)
               comp_line = ENV['COMP_LINE']
-              comp_point = ENV['COMP_POINT']
-              comp_key = ENV['COMP_KEY']
-              comp_type = ENV['COMP_TYPE']
-              puts Completion::Generator.match(comp_line, comp_point, comp_key, comp_type)
+              puts generator.match(comp_line)
             end
           end
         end
