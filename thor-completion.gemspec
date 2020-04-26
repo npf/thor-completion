@@ -17,6 +17,7 @@ Gem::Specification.new do |spec|
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = spec.homepage
   spec.metadata['changelog_uri'] = spec.homepage + '/CHANGELOG.md'
+  spec.metadata['bug_tracker_uri'] = spec.homepage + 'issues'
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
@@ -30,6 +31,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'thor'
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'pry'
+  spec.add_development_dependency 'pry-byebug'
+  spec.add_development_dependency 'byebug'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec'
 end
