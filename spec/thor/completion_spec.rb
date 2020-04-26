@@ -113,30 +113,8 @@ RSpec.describe Thor::Completion do
     end
   end
   describe 'Test completion' do
-    class MyScript < Thor
-      include Thor::Completion::Command
-      class Subcommand < Thor
-        class_option :subcommand_class_option, type: :boolean
-
-        desc 'subcommand_command', 'A subcommand command with one argument'
-        def subcommand_command(arg)
-          puts "A command output #{arg}"
-        end
-      end
-      class_option :class_option, type: :boolean
-
-      desc 'subcommand', 'A subcommand'
-      subcommand 'subcommand', Subcommand
-
-      desc 'command', 'A command with one argument'
-      method_option :option, type: :string
-      def command(arg)
-        puts "A command output #{arg}"
-      end
-    end
-
     it 'dumps its completions' do
-      expect(capture(:stdout) { MyScript.start(%w[completion --dump --name=MyScript]) }).to eq <<-MYSCRIPTOUTPUT
+      expect(capture(:stdout) { MyScript1.start(%w[completion --dump --name=MyScript]) }).to eq <<-MYSCRIPTOUTPUT
 'MyScript subcommand subcommand_command ARGVAL'
 'MyScript command ARGVAL --option OPTVAL'
 'MyScript command ARGVAL --option=OPTVAL'
@@ -151,13 +129,13 @@ MYSCRIPTOUTPUT
     end
 
     it 'gives a completion' do
-      expect(capture(:stdout) { MyScript.start(%w[completion --name=MyScript --line co]) }).to eq <<-COMPLETION
+      expect(capture(:stdout) { MyScript1.start(%w[completion --name=MyScript --line co]) }).to eq <<-COMPLETION
 command
 COMPLETION
     end
 
     it 'gives another completion' do
-      expect(capture(:stdout) { MyScript.start(%w[completion --name=MyScript --line command\ ]) }).to eq <<-COMPLETION
+      expect(capture(:stdout) { MyScript1.start(%w[completion --name=MyScript --line command\ ]) }).to eq <<-COMPLETION
 ARGVAL
 --option
 --option=OPTVAL
