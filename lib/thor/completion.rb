@@ -10,3 +10,5 @@ end
 
 require 'thor/completion/command'
 require 'thor/completion/generator'
+require 'thor/completion/introspector'
+require 'thor/completion/regexp'
