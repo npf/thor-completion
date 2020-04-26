@@ -5,7 +5,7 @@ RSpec.describe Thor::Completion do
     end
   end
 
-  describe 'Introspector' do
+  describe 'Test Introspector' do
     let(:thor) do
       Class.new(Thor) do
         desc 'command', 'A command'
@@ -32,14 +32,14 @@ RSpec.describe Thor::Completion do
 
     it 'dumps correct completions for a command with an argument' do
       expect(Thor::Completion::Introspector.new(thor2, 'thor_cli').to_a).to eq [
-        "'thor_cli command ARGS'"
+        "'thor_cli command ARGVAL'"
       ]
     end
 
     let(:thor3) do
       Class.new(Thor) do
         desc 'command', 'A command'
-        method_option 'option', type: :boolean
+        method_option 'option', type: :string
         def command(arg)
           puts "A command output #{arg}"
         end
@@ -48,8 +48,10 @@ RSpec.describe Thor::Completion do
 
     it 'dumps correct completions for a command with an argument and an option' do
       expect(Thor::Completion::Introspector.new(thor3, 'thor_cli').to_a).to eq [
-        "'thor_cli command ARGS --option'",
-        "'thor_cli command --option ARGS'"
+        "'thor_cli command ARGVAL --option OPTVAL'",
+        "'thor_cli command ARGVAL --option=OPTVAL'",
+        "'thor_cli command --option OPTVAL ARGVAL'",
+        "'thor_cli command --option=OPTVAL ARGVAL'"
       ]
     end
 
@@ -67,14 +69,14 @@ RSpec.describe Thor::Completion do
 
     it 'dumps completions for a simple command with an argument and an option' do
       expect(Thor::Completion::Introspector.new(thor4, 'thor_cli').to_a).to eq [
-        "'thor_cli command ARGS --option --classoption'",
-        "'thor_cli command ARGS --classoption --option'",
-        "'thor_cli command --option ARGS --classoption'",
-        "'thor_cli command --option --classoption ARGS'",
-        "'thor_cli command --classoption ARGS --option'",
-        "'thor_cli command --classoption --option ARGS'",
-        "'thor_cli --classoption command ARGS --option'",
-        "'thor_cli --classoption command --option ARGS'"
+        "'thor_cli command ARGVAL --option --classoption'",
+        "'thor_cli command ARGVAL --classoption --option'",
+        "'thor_cli command --option ARGVAL --classoption'",
+        "'thor_cli command --option --classoption ARGVAL'",
+        "'thor_cli command --classoption ARGVAL --option'",
+        "'thor_cli command --classoption --option ARGVAL'",
+        "'thor_cli --classoption command ARGVAL --option'",
+        "'thor_cli --classoption command --option ARGVAL'"
       ]
     end
 
@@ -101,13 +103,63 @@ RSpec.describe Thor::Completion do
     end
 
     it 'dumps completions for a simple command with an argument and an option' do
-      puts Thor::Completion::Introspector.new(thor5, 'thor_cli').to_a
+      # puts Thor::Completion::Introspector.new(thor5, 'thor_cli').to_a
       expect(Thor::Completion::Introspector.new(thor5, 'thor_cli').to_a).to eq [
-        "'thor_cli subcommand subcommand_command ARGS'",
-        "'thor_cli command ARGS'",
-        "'thor_cli --class-option subcommand subcommand_command ARGS'",
-        "'thor_cli --class-option command ARGS'"
+        "'thor_cli subcommand subcommand_command ARGVAL'",
+        "'thor_cli command ARGVAL'",
+        "'thor_cli --class-option subcommand subcommand_command ARGVAL'",
+        "'thor_cli --class-option command ARGVAL'"
       ]
+    end
+  end
+  describe 'Test completion' do
+    class MyScript < Thor
+      include Thor::Completion::Command
+      class Subcommand < Thor
+        class_option :subcommand_class_option, type: :boolean
+
+        desc 'subcommand_command', 'A subcommand command with one argument'
+        def subcommand_command(arg)
+          puts "A command output #{arg}"
+        end
+      end
+      class_option :class_option, type: :boolean
+
+      desc 'subcommand', 'A subcommand'
+      subcommand 'subcommand', Subcommand
+
+      desc 'command', 'A command with one argument'
+      method_option :option, type: :string
+      def command(arg)
+        puts "A command output #{arg}"
+      end
+    end
+
+    it 'dumps its completions' do
+      expect(capture(:stdout) { MyScript.start(%w[completion --dump --name=MyScript]) }).equal? <<-MYSCRIPTOUTPUT
+  'MyScript subcommand subcommand_command ARGVAL'
+  'MyScript command ARGVAL --option OPTVAL'
+  'MyScript command ARGVAL --option=OPTVAL'
+  'MyScript command --option OPTVAL ARGVAL'
+  'MyScript command --option=OPTVAL ARGVAL'
+  'MyScript --class-option subcommand subcommand_command ARGVAL'
+  'MyScript --class-option command ARGVAL --option OPTVAL'
+  'MyScript --class-option command ARGVAL --option=OPTVAL'
+  'MyScript --class-option command --option OPTVAL ARGVAL'
+  'MyScript --class-option command --option=OPTVAL ARGVAL'
+MYSCRIPTOUTPUT
+    end
+
+    it 'gives a completion' do
+      ENV['COMP_LINE'] = 'MyScript co'
+      puts capture(:stdout) { MyScript.start(%w[completion --name=MyScript]) }
+      expect(capture(:stdout) { MyScript.start(%w[completion --name=MyScript]) }).to be 'command'
+    end
+
+    ENV['COMP_LINE'] = 'MyScript command '
+    it 'gives a completion' do
+      puts capture(:stdout) { MyScript.start(%w[completion --name=MyScript]) }
+      expect(capture(:stdout) { MyScript.start(%w[completion --name=MyScript]) }).equal? 'command'
     end
   end
 end
