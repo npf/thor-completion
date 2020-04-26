@@ -2,9 +2,10 @@ class Thor
   module Completion
     # Introspection functions to retrieve the thor completions
     class Introspector
-      def initialize(thor, name)
+      def initialize(thor, name, show_help = false)
         @thor = thor
         @name = name
+        @show_help = show_help
         build_completions
         to_a
       end
@@ -46,7 +47,7 @@ class Thor
 
       def get_commands_rec(commands, parameters, options)
         comp = {}
-        commands.each do |k, v|
+        commands.select { |k, _v| @show_help || k != 'help' }.each do |k, v|
           command, command_class = v
           new_commands = {}
           if command_class.subcommands.include?(k)
@@ -99,7 +100,7 @@ class Thor
           h = get_commands_rec(commands, parameters, options.reject { |kk, _vv| kk == k })
               .merge(get_parameters_rec(commands, parameters, options.reject { |kk, _vv| kk == k }))
               .merge(get_options_rec(commands, parameters, options.reject { |kk, _vv| kk == k }))
-          (["--#{v.name}"] + v.aliases).each do |o|
+          (["--#{v.name.gsub('_','-')}"] + v.aliases).each do |o|
             if v.type == :boolean
               comp[o] = { regex: Completion::Regexp.build(o), children: h }
             else

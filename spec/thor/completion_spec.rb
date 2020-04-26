@@ -17,11 +17,6 @@ RSpec.describe Thor::Completion do
 
     it 'dumps correct completions for a command' do
       expect(Thor::Completion::Introspector.new(thor, 'thor_cli').to_a).to eq [
-        "'thor_cli help ARGS ARGS'",
-        "'thor_cli -h ARGS ARGS'",
-        "'thor_cli -? ARGS ARGS'",
-        "'thor_cli --help ARGS ARGS'",
-        "'thor_cli -D ARGS ARGS'",
         "'thor_cli command'"
       ]
     end
@@ -37,11 +32,6 @@ RSpec.describe Thor::Completion do
 
     it 'dumps correct completions for a command with an argument' do
       expect(Thor::Completion::Introspector.new(thor2, 'thor_cli').to_a).to eq [
-        "'thor_cli help ARGS ARGS'",
-        "'thor_cli -h ARGS ARGS'",
-        "'thor_cli -? ARGS ARGS'",
-        "'thor_cli --help ARGS ARGS'",
-        "'thor_cli -D ARGS ARGS'",
         "'thor_cli command ARGS'"
       ]
     end
@@ -58,11 +48,6 @@ RSpec.describe Thor::Completion do
 
     it 'dumps correct completions for a command with an argument and an option' do
       expect(Thor::Completion::Introspector.new(thor3, 'thor_cli').to_a).to eq [
-        "'thor_cli help ARGS ARGS'",
-        "'thor_cli -h ARGS ARGS'",
-        "'thor_cli -? ARGS ARGS'",
-        "'thor_cli --help ARGS ARGS'",
-        "'thor_cli -D ARGS ARGS'",
         "'thor_cli command ARGS --option'",
         "'thor_cli command --option ARGS'"
       ]
@@ -82,32 +67,12 @@ RSpec.describe Thor::Completion do
 
     it 'dumps completions for a simple command with an argument and an option' do
       expect(Thor::Completion::Introspector.new(thor4, 'thor_cli').to_a).to eq [
-        "'thor_cli help ARGS ARGS --classoption'",
-        "'thor_cli help ARGS --classoption ARGS'",
-        "'thor_cli help --classoption ARGS ARGS'",
-        "'thor_cli -h ARGS ARGS --classoption'",
-        "'thor_cli -h ARGS --classoption ARGS'",
-        "'thor_cli -h --classoption ARGS ARGS'",
-        "'thor_cli -? ARGS ARGS --classoption'",
-        "'thor_cli -? ARGS --classoption ARGS'",
-        "'thor_cli -? --classoption ARGS ARGS'",
-        "'thor_cli --help ARGS ARGS --classoption'",
-        "'thor_cli --help ARGS --classoption ARGS'",
-        "'thor_cli --help --classoption ARGS ARGS'",
-        "'thor_cli -D ARGS ARGS --classoption'",
-        "'thor_cli -D ARGS --classoption ARGS'",
-        "'thor_cli -D --classoption ARGS ARGS'",
         "'thor_cli command ARGS --option --classoption'",
         "'thor_cli command ARGS --classoption --option'",
         "'thor_cli command --option ARGS --classoption'",
         "'thor_cli command --option --classoption ARGS'",
         "'thor_cli command --classoption ARGS --option'",
         "'thor_cli command --classoption --option ARGS'",
-        "'thor_cli --classoption help ARGS ARGS'",
-        "'thor_cli --classoption -h ARGS ARGS'",
-        "'thor_cli --classoption -? ARGS ARGS'",
-        "'thor_cli --classoption --help ARGS ARGS'",
-        "'thor_cli --classoption -D ARGS ARGS'",
         "'thor_cli --classoption command ARGS --option'",
         "'thor_cli --classoption command --option ARGS'"
       ]
@@ -115,13 +80,15 @@ RSpec.describe Thor::Completion do
 
     let(:thor5) do
       Class.new(Thor) do
-        @HELP_MAPPINGS = [ '-h' ]
         class Subcommand < Thor
+          class_option :subcommand_class_option, type: :boolean
+
           desc 'subcommand_command', 'A subcommand command with one argument'
           def subcommand_command(arg)
             puts "A command output #{arg}"
           end
         end
+        class_option :class_option, type: :boolean
 
         desc 'subcommand', 'A subcommand'
         subcommand 'subcommand', Subcommand
@@ -136,18 +103,10 @@ RSpec.describe Thor::Completion do
     it 'dumps completions for a simple command with an argument and an option' do
       puts Thor::Completion::Introspector.new(thor5, 'thor_cli').to_a
       expect(Thor::Completion::Introspector.new(thor5, 'thor_cli').to_a).to eq [
-        "'thor_cli help ARGS ARGS'",
-        "'thor_cli -h ARGS ARGS'",
-        "'thor_cli -? ARGS ARGS'",
-        "'thor_cli --help ARGS ARGS'",
-        "'thor_cli -D ARGS ARGS'",
-        "'thor_cli subcommand help ARGS ARGS'",
-        "'thor_cli subcommand -h ARGS ARGS'",
-        "'thor_cli subcommand -? ARGS ARGS'",
-        "'thor_cli subcommand --help ARGS ARGS'",
-        "'thor_cli subcommand -D ARGS ARGS'",
         "'thor_cli subcommand subcommand_command ARGS'",
-        "'thor_cli command ARGS'"
+        "'thor_cli command ARGS'",
+        "'thor_cli --class-option subcommand subcommand_command ARGS'",
+        "'thor_cli --class-option command ARGS'"
       ]
     end
   end
