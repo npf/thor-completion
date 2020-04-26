@@ -71,6 +71,7 @@ RSpec.describe Thor::Completion do
     let(:thor4) do
       Class.new(Thor) do
         class_option :classoption, type: :boolean
+
         desc 'command', 'A command with one argument and one option and a class option'
         method_option 'option', type: :boolean
         def command(arg)
@@ -109,6 +110,44 @@ RSpec.describe Thor::Completion do
         "'thor_cli --classoption -D ARGS ARGS'",
         "'thor_cli --classoption command ARGS --option'",
         "'thor_cli --classoption command --option ARGS'"
+      ]
+    end
+
+    let(:thor5) do
+      Class.new(Thor) do
+        @HELP_MAPPINGS = [ '-h' ]
+        class Subcommand < Thor
+          desc 'subcommand_command', 'A subcommand command with one argument'
+          def subcommand_command(arg)
+            puts "A command output #{arg}"
+          end
+        end
+
+        desc 'subcommand', 'A subcommand'
+        subcommand 'subcommand', Subcommand
+
+        desc 'command', 'A command with one argument'
+        def command(arg)
+          puts "A command output #{arg}"
+        end
+      end
+    end
+
+    it 'dumps completions for a simple command with an argument and an option' do
+      puts Thor::Completion::Introspector.new(thor5, 'thor_cli').to_a
+      expect(Thor::Completion::Introspector.new(thor5, 'thor_cli').to_a).to eq [
+        "'thor_cli help ARGS ARGS'",
+        "'thor_cli -h ARGS ARGS'",
+        "'thor_cli -? ARGS ARGS'",
+        "'thor_cli --help ARGS ARGS'",
+        "'thor_cli -D ARGS ARGS'",
+        "'thor_cli subcommand help ARGS ARGS'",
+        "'thor_cli subcommand -h ARGS ARGS'",
+        "'thor_cli subcommand -? ARGS ARGS'",
+        "'thor_cli subcommand --help ARGS ARGS'",
+        "'thor_cli subcommand -D ARGS ARGS'",
+        "'thor_cli subcommand subcommand_command ARGS'",
+        "'thor_cli command ARGS'"
       ]
     end
   end
