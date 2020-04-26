@@ -1,4 +1,10 @@
 require 'bundler/setup'
+
+require "simplecov"
+SimpleCov.start do
+  add_filter '/spec'
+end
+
 require 'thor/completion'
 
 RSpec.configure do |config|
