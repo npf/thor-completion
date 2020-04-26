@@ -76,16 +76,12 @@ class Thor
         comp = {}
         if parameters.any?
           p = parameters.first
+          r_one_arg = '(:?|[^\s-][^\s]*)'
           r = case p[0]
-              when :opt
-                # "[<#{p[1]}>]"
-                /^[^\s]*$/
               when :rest
-                # "[<#{p[1]}>[...]]"
-                /^[^\s]*(\s+[^\s]+)*$/
+                /^#{r_one_arg}(\s+#{r_one_arg})*$/
               else
-                # "<#{p[1]}>"
-                /^[^\s]*$/
+                /^#{r_one_arg}$/
               end
           comp['ARGVAL'] = { regexp: r, children: get_commands_rec(commands, parameters[1..-1], options)
                            .merge(get_parameters_rec(commands, parameters[1..-1], options))
