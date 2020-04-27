@@ -116,29 +116,66 @@ RSpec.describe Thor::Completion do
     it 'dumps its completions' do
       expect(capture(:stdout) { MyScript1.start(%w[completion --dump --name=MyScript]) }).to eq <<-MYSCRIPTOUTPUT
 'MyScript subcommand subcommand_command ARGVAL'
-'MyScript command ARGVAL --option OPTVAL'
-'MyScript command ARGVAL --option=OPTVAL'
-'MyScript command --option OPTVAL ARGVAL'
-'MyScript command --option=OPTVAL ARGVAL'
-'MyScript --class-option subcommand subcommand_command ARGVAL'
-'MyScript --class-option command ARGVAL --option OPTVAL'
-'MyScript --class-option command ARGVAL --option=OPTVAL'
-'MyScript --class-option command --option OPTVAL ARGVAL'
-'MyScript --class-option command --option=OPTVAL ARGVAL'
+'MyScript command ARGVAL --option-str OPTVAL --option-bool'
+'MyScript command ARGVAL --option-str=OPTVAL --option-bool'
+'MyScript command ARGVAL --option-bool --option-str OPTVAL'
+'MyScript command ARGVAL --option-bool --option-str=OPTVAL'
+'MyScript command --option-str OPTVAL ARGVAL --option-bool'
+'MyScript command --option-str OPTVAL --option-bool ARGVAL'
+'MyScript command --option-str=OPTVAL ARGVAL --option-bool'
+'MyScript command --option-str=OPTVAL --option-bool ARGVAL'
+'MyScript command --option-bool ARGVAL --option-str OPTVAL'
+'MyScript command --option-bool ARGVAL --option-str=OPTVAL'
+'MyScript command --option-bool --option-str OPTVAL ARGVAL'
+'MyScript command --option-bool --option-str=OPTVAL ARGVAL'
+'MyScript --class-option-bool subcommand subcommand_command ARGVAL'
+'MyScript --class-option-bool command ARGVAL --option-str OPTVAL --option-bool'
+'MyScript --class-option-bool command ARGVAL --option-str=OPTVAL --option-bool'
+'MyScript --class-option-bool command ARGVAL --option-bool --option-str OPTVAL'
+'MyScript --class-option-bool command ARGVAL --option-bool --option-str=OPTVAL'
+'MyScript --class-option-bool command --option-str OPTVAL ARGVAL --option-bool'
+'MyScript --class-option-bool command --option-str OPTVAL --option-bool ARGVAL'
+'MyScript --class-option-bool command --option-str=OPTVAL ARGVAL --option-bool'
+'MyScript --class-option-bool command --option-str=OPTVAL --option-bool ARGVAL'
+'MyScript --class-option-bool command --option-bool ARGVAL --option-str OPTVAL'
+'MyScript --class-option-bool command --option-bool ARGVAL --option-str=OPTVAL'
+'MyScript --class-option-bool command --option-bool --option-str OPTVAL ARGVAL'
+'MyScript --class-option-bool command --option-bool --option-str=OPTVAL ARGVAL'
 MYSCRIPTOUTPUT
     end
 
-    it 'gives a completion' do
+    it 'gives a command name completion' do
       expect(capture(:stdout) { MyScript1.start(%w[completion --name=MyScript --line co]) }).to eq <<-COMPLETION
 command
 COMPLETION
     end
 
-    it 'gives another completion' do
+    it 'gives a command arguments and options completion' do
       expect(capture(:stdout) { MyScript1.start(%w[completion --name=MyScript --line command\ ]) }).to eq <<-COMPLETION
 ARGVAL
---option
---option=OPTVAL
+--option-str
+--option-str=
+--option-bool
+COMPLETION
+    end
+
+    it 'gives a command option name completion' do
+      expect(capture(:stdout) { MyScript1.start(%w[completion --name=MyScript --line command\ --o]) }).to eq <<-COMPLETION
+--option-str
+--option-str=
+--option-bool
+COMPLETION
+    end
+
+    it 'gives a command option value completion' do
+      expect(capture(:stdout) { MyScript1.start(%w[completion --name=MyScript --line command\ --option-str\ ]) }).to eq <<-COMPLETION
+OPTVAL
+COMPLETION
+    end
+
+    it 'gives a command option value completion' do
+      expect(capture(:stdout) { MyScript1.start(%w[completion --name=MyScript --line command\ --option-str=]) }).to eq <<-COMPLETION
+OPTVAL
 COMPLETION
     end
   end
